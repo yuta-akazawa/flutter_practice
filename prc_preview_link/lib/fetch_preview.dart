@@ -4,8 +4,10 @@ import 'package:html/parser.dart';
 class FetchPreview {
 
   Future fetch(url) async {
+    if (url == null) return null;
+
     final client = Client();
-    final response = await client.get(_validateUrl(url));
+    final response = await client.get(validateUrl(url));
     final document = parse(response.body);
 
     String title, description, image, favIcon;
@@ -62,7 +64,8 @@ class FetchPreview {
     };
   }
 
-  _validateUrl(String url) {
+  String validateUrl(String url) {
+    if (url == null) return null;
     if (url.startsWith('http://') == true || url.startsWith('https://') == true) {
       return url;
     } else {

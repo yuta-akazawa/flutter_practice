@@ -1,5 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:prc_preview_link/fetch_preview.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 void main() => runApp(MyApp());
 
@@ -40,7 +42,8 @@ class MyHomePageState extends State<MyHomePage> {
             child: TextField(
               onChanged: (value) {
                 setState(() {
-                  url = value;
+                  url = FetchPreview().validateUrl(value);
+                  print(url);
                 });
               },
             ),
@@ -61,37 +64,64 @@ class MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  _launchUrl(String url) async {
+    if (await canLaunch(url)) {
+      await launch(url);
+    } else {
+      throw 'Could not launch $url';
+    }
+  }
+
   _previewWidget() {
     if (data == null) {
       return Container();
     }
 
-    return Padding(
-      padding: const EdgeInsets.all(8.0),
-      child: Container(
-        color: Colors.green[100],
-        child: Row(
-          children: <Widget>[
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Image.network(data['image'], height: 100, width: 100,fit: BoxFit.cover,),
-            ),
-            Flexible(
-              child: Padding(
+    return InkWell(
+      onTap: () {
+        _launchUrl(url);
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Container(
+          color: Colors.green[100],
+          child: Row(
+            children: <Widget>[
+              Padding(
                 padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Text(data['title'], style: TextStyle(fontWeight: FontWeight.bold),),
-                    SizedBox(height: 4,),
-                    Text(data['description']),
-                    SizedBox(height: 4,),
-                    Text(url, style: TextStyle(color: Colors.grey, fontSize: 12),),
-                  ],
+                child: CachedNetworkImage(
+                  imageUrl: data['image'],
+                  imageBuilder: (context, imageProvider) => Container(
+                    height: 100,
+                    width: 100,
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                          image: imageProvider,
+                          fit: BoxFit.cover
+                      ),
+                    ),
+                  ),
+                  placeholder: (context, url) => CircularProgressIndicator(),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
                 ),
               ),
-            ),
-          ],
+              Flexible(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      Text(data['title'], style: TextStyle(fontWeight: FontWeight.bold),),
+                      SizedBox(height: 4,),
+                      Text(data['description']),
+                      SizedBox(height: 4,),
+                      Text(url, style: TextStyle(color: Colors.grey, fontSize: 12),),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
