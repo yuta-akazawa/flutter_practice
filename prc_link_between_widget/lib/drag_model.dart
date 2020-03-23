@@ -13,14 +13,10 @@ class DragModel extends ChangeNotifier {
   }
 }
 
-class DragItems extends ChangeNotifier {
-  List<DragModel> _list = [];
+class DragModelList {
+  List list;
 
-  get list => _list;
-  get length => _list.length;
-
-  void add(DragModel dragModel) {
-    _list.add(dragModel);
-    notifyListeners();
+  init() {
+    list = List.generate(2, (i) => DragModel());
   }
 }

@@ -1,20 +1,18 @@
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'drag_model.dart';
-import 'dart:math';
+
 
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => DragModel()),
-        ChangeNotifierProvider(create: (context) => DragItems()),
-      ],
+    return ChangeNotifierProvider(
+      create: (context) => DragModel(),
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Link Circles',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
@@ -25,10 +23,12 @@ class MyApp extends StatelessWidget {
 }
 
 class LinkScreen extends StatelessWidget  {
+  DragModelList
 
   @override
   Widget build(BuildContext context) {
-    final dragItems = Provider.of<DragItems>(context);
+    final drag1 = Provider.of<DragModel>(context);
+    final drag2 = Provider.of<DragModel>(context);
 
     return Scaffold(
       body: SafeArea(
@@ -36,12 +36,19 @@ class LinkScreen extends StatelessWidget  {
           children: <Widget>[
             CustomPaint(
               painter: LinkPointer(
-                offset1: dragItems.list[0].offset,
-                offset2: dragItems.list[1].offset,
+                offset1: drag1.offset,
+                offset2: drag2.offset,
               ),
               child: Container(),
             ),
-            List.generate(dragItems.length, (i) => DragModel());
+            DragWidget(
+              drag: drag1,
+              color: Colors.red,
+            ),
+            DragWidget(
+              drag: drag2,
+              color: Colors.green,
+            ),
           ],
         ),
       ),
@@ -100,7 +107,6 @@ class LinkPointer extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    print("paint size: ${size.width}, ${size.height}");
     final Paint paint= Paint()
     ..color = Colors.blueGrey
     ..strokeWidth = 3;
