@@ -11,10 +11,10 @@ class BounceDot extends AnimatedWidget {
     print('bounce: ${animation.value}');
 
     return Transform.translate(
-      offset: Offset(0, animation.value),
+      offset: Offset(0, -animation.value),
       child: Container(
-        width: 10,
-        height: 10,
+        width: 20,
+        height: 20,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: Colors.yellow
@@ -26,7 +26,7 @@ class BounceDot extends AnimatedWidget {
 
 class BounceDotsIndicator extends StatefulWidget {
   final double beginTweenValue = 0.0;
-  final double endTweenValue = 10.0;
+  final double endTweenValue = 20.0;
   @override
   _BounceDotsIndicatorState createState() => _BounceDotsIndicatorState();
 }
