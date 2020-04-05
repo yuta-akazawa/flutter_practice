@@ -25,7 +25,6 @@ class MyHomePage extends StatelessWidget {
         title: Text('Bounce Dots Indicator'),
       ),
       body: Container(
-//        color: Colors.green,
         child: Center(
           child: BounceDotsIndicator(),
         ),
