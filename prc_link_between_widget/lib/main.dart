@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 void main() => runApp(MyApp());
 
@@ -26,38 +25,21 @@ class LinkState extends State<LinkScreen>  {
   double y1 = 10.0;
   double x2 = 100.0;
   double y2 = 100.0;
-  double top = 100.0;
-  double left = 100.0;
-  double _preX1, _preY1, _preX2, _preY2;
-  double circleSize = 10.0;
-  double right = 100.0;
-  double bottom = 100.0;
 
   @override
   Widget build(BuildContext context) {
-//    print("off1: ${Offset(x1, y1)}");
-//    print("off2: ${Offset(x2, y2)}");
-//    print(top);
-    print(left);
 
     return Scaffold(
       body: SafeArea(
-        child: Stack(
-          children: <Widget>[
-            Positioned(
-              top: top,
-              left: left,
-              right: right,
-              bottom: bottom,
-              child: Container(
-                constraints: BoxConstraints.tight(
-                  Size(
-                      x2 > x1 ? x2 + circleSize : x1 + circleSize,
-                      y2 > y1 ? y2 + circleSize : y1 + circleSize
-                  ),
-                ),
-                color: Colors.green,
-                child: Stack(
+        child: FocusScope(
+          autofocus: true,
+          child: Focus(
+            child: Builder(
+              builder: (BuildContext context) {
+                final FocusNode focusNode = Focus.of(context);
+                final bool hasFocus = focusNode.hasFocus;
+
+                return Stack(
                   overflow: Overflow.visible,
                   children: <Widget>[
                     CustomPaint(
@@ -67,41 +49,43 @@ class LinkState extends State<LinkScreen>  {
                       ),
                       child: Container(),
                     ),
+
+                    Positioned.fromRect(
+                      rect: Rect.fromPoints(
+                          Offset(x1, y1),
+                          Offset(x2, y2)
+                      ),
+                      child: GestureDetector(
+                        onTap: () {
+                          print("onTap");
+                          if (hasFocus) {
+                            focusNode.unfocus();
+                          } else {
+                            focusNode.requestFocus();
+                          }
+                        },
+                        child: Container(
+                          color: hasFocus ? Colors.blue.withOpacity(0.5) : Colors.green.withOpacity(0.5),
+                        ),
+                      ),
+                    ),
                     Positioned.fromRect(
                       rect: Rect.fromPoints(
                           Offset(x1 - 10, y1 - 10),
                           Offset(x1 + 10, y1 + 10)
                       ),
                       child: GestureDetector(
-                        onScaleStart: (details) {
-                          _preX1 = x1;
-                          _preY1 = y1;
-                          print("pre x :${_preX1.toString()}");
-                        },
                         onScaleUpdate: (details) {
                           setState(() {
-                            x1 = details.localFocalPoint.dx;
-                            y1 = details.localFocalPoint.dy;
-
-                            print("focalPoint.dx: ${details.focalPoint.dx}");
-//                            print("focalPoint.dy: ${details.focalPoint.dy}");
-                            print("localPoint.dx: ${details.localFocalPoint.dx}");
-//                            print("localPoint.dy: ${details.localFocalPoint.dy}");
-                            double moveX = _preX1 - details.localFocalPoint.dx;
-                            print("moveX: ${moveX.toString()}");
-                            left = details.focalPoint.dx;
-//                            left += moveX;
-
-//                            if (moveX < 0) {
-//                            } else {
-//                              left -= details.localFocalPoint.dx;
-//                            }
+                            x1 = details.focalPoint.dx;
+                            y1 = details.focalPoint.dy;
                           });
+                          if (hasFocus) {
+                            print('scale: hasfocus');
+                          } else {
+                            print('scale: not hasfocus');
+                          }
                         },
-//                        onScaleEnd: (details) {
-//                          _preX1 = null;
-//                          _preY1 = null;
-//                        },
                         child: CircleContainer(color: Colors.red),
                       ),
                     ),
@@ -113,18 +97,23 @@ class LinkState extends State<LinkScreen>  {
                       child: GestureDetector(
                         onScaleUpdate: (details) {
                           setState(() {
-                            x2 = details.localFocalPoint.dx;
-                            y2 = details.localFocalPoint.dy;
+                            x2 = details.focalPoint.dx;
+                            y2 = details.focalPoint.dy;
                           });
+                          if (hasFocus) {
+                            print('scale: hasfocus');
+                          } else {
+                            print('scale: not hasfocus');
+                          }
                         },
                         child: CircleContainer(color: Colors.blue),
                       ),
                     ),
                   ],
-                ),
-              ),
+                );
+              },
             ),
-          ],
+          ),
         ),
       ),
     );
