@@ -52,8 +52,8 @@ class LinkState extends State<LinkScreen>  {
 
                     Positioned.fromRect(
                       rect: Rect.fromPoints(
-                          Offset(x1, y1),
-                          Offset(x2, y2)
+                          Offset(x1 - 5, y1 - 5),
+                          Offset(x2 + 5, y2 + 5)
                       ),
                       child: GestureDetector(
                         onTap: () {
@@ -64,8 +64,14 @@ class LinkState extends State<LinkScreen>  {
                             focusNode.requestFocus();
                           }
                         },
-                        child: Container(
-                          color: hasFocus ? Colors.blue.withOpacity(0.5) : Colors.green.withOpacity(0.5),
+                        child: ClipPath(
+                          child: Container(
+                            color: hasFocus ? Colors.blue.withOpacity(0.5) : Colors.green.withOpacity(0.5),
+                          ),
+                          clipper: LineClipper(
+                              a: Offset(x1, y1),
+                              b: Offset(x2, y2),
+                          ),
                         ),
                       ),
                     ),
@@ -80,13 +86,10 @@ class LinkState extends State<LinkScreen>  {
                             x1 = details.focalPoint.dx;
                             y1 = details.focalPoint.dy;
                           });
-                          if (hasFocus) {
-                            print('scale: hasfocus');
-                          } else {
-                            print('scale: not hasfocus');
-                          }
                         },
-                        child: CircleContainer(color: Colors.red),
+                        child: CircleContainer(
+                            color: Colors.red
+                        ),
                       ),
                     ),
                     Positioned.fromRect(
@@ -100,13 +103,10 @@ class LinkState extends State<LinkScreen>  {
                             x2 = details.focalPoint.dx;
                             y2 = details.focalPoint.dy;
                           });
-                          if (hasFocus) {
-                            print('scale: hasfocus');
-                          } else {
-                            print('scale: not hasfocus');
-                          }
                         },
-                        child: CircleContainer(color: Colors.blue),
+                        child: CircleContainer(
+                            color: Colors.yellow
+                        ),
                       ),
                     ),
                   ],
@@ -157,4 +157,47 @@ class LinkPointer extends CustomPainter {
   bool shouldRepaint(CustomPainter oldDelegate) {
     return true;
   }
+}
+
+class LineClipper extends CustomClipper<Path> {
+  final Offset a;
+  final Offset b;
+  LineClipper({
+    @required this.a,
+    @required this.b
+  });
+
+  _clipAroundLine(Path path, Size size) {
+    if (a < b || a > b) {
+      print("hoge");
+      path.lineTo(0, 10);
+      path.lineTo(size.width - 10, size.height);
+      path.lineTo(size.width, size.height - 10);
+      path.lineTo(10, 0);
+    } else {
+      print("piyo");
+      path.moveTo(0, size.height - 10);
+      path.lineTo(0, size.height);
+      path.lineTo(size.width, 10);
+      path.lineTo(size.width, 0);
+    }
+    if (a.dx == b.dx) {
+      print("hogehoge");
+      path.lineTo(0, 0);
+      path.lineTo(size.width, size.height / 2);
+    } else if (a.dy == b.dy) {
+      print("figafiga");
+    }
+  }
+
+  @override
+  Path getClip(Size size) {
+    final path = Path();
+    _clipAroundLine(path, size);
+    path.close();
+    return path;
+  }
+
+  @override
+  bool shouldReclip(CustomClipper oldClipper) => true;
 }
