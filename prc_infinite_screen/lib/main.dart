@@ -31,6 +31,7 @@ class _MyHomePageState extends State<MyHomePage> {
   double _previousScale;
   double x = 0.0;
   double y = 0.0;
+  double _preX,_preY;
   Offset _centerOffset;
 
   @override
@@ -50,8 +51,6 @@ class _MyHomePageState extends State<MyHomePage> {
             child: LayoutBuilder(builder: (context, constraints) {
               final size = Size(constraints.maxWidth, constraints.maxHeight);
               final visibleSize = Size(size.width * 3, size.height * 3);
-//              Offset _centerOffset = Offset(x, y);
-              print("x:${x.toString()}, y:${y.toString()}");
               return Stack(
                 children: <Widget>[
                   Positioned.fromRect(
@@ -61,30 +60,27 @@ class _MyHomePageState extends State<MyHomePage> {
                       height: visibleSize.height
                     ),
                     child: GestureDetector(
-//                      onScaleStart: (details) {
-//                        _previousScale = _scale;
-//                      },
-//                      onScaleUpdate: (details) {
-//                        x = details.focalPoint.dx;
-//                        y = details.focalPoint.dy;
-//
-//                        Offset newOffset = _centerOffset.translate(-x, -y);
-//                        setState(() {
-//                          print("_scale:${_scale.toString()}");
-////                          if (_scale < 2.0 && _scale > 0.2) {
-////                          }
-//                            _scale = _previousScale * details.scale;
-//                          _centerOffset = newOffset;
-//                        });
-//                      },
-//                      onScaleEnd: (details) {
-//                        _previousScale = null;
-//                      },
-                      onPanUpdate: (details) {
-                        Offset newOffset = _centerOffset.translate(details.delta.dx, details.delta.dy);
+                      onScaleStart: (details) {
+                        _previousScale = _scale;
+                      },
+                      onScaleUpdate: (details) {
+                        _preX = x;
+                        _preY = y;
+                        x = details.focalPoint.dx;
+                        y = details.focalPoint.dy;
+//                        print("x:${x.toString()}, y:${y.toString()}");
+//                        print("preX:${_preX.toString()}, preY:${_preY.toString()}");
+//                        print("deltaX:${x - _preX}, deltaY:${y - _preY}");
+                        Offset newOffset = _centerOffset.translate(x - _preX, y - _preY);
+
                         setState(() {
                           _centerOffset = newOffset;
+//                          print("_scale:${_scale.toString()}");
+                            _scale = _previousScale * details.scale;
                         });
+                      },
+                      onScaleEnd: (details) {
+                        _previousScale = null;
                       },
                       child: Transform(
                         transform: Matrix4.identity()
