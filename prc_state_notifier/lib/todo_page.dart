@@ -50,7 +50,7 @@ class TodoPage extends StatelessWidget {
               FlatButton(
                   onPressed: () {
                     if (_formKey.currentState.validate()) {
-                      Provider.of<TodoProvider>(context, listen: false).add(_textEditController.text);
+                      context.read<TodoController>().add(_textEditController.text);
                     }
                     Navigator.pop(context);
                     _textEditController.clear();
@@ -64,33 +64,24 @@ class TodoPage extends StatelessWidget {
   }
 }
 
-
 class TodoList extends StatelessWidget {
+
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        var list = constraints.maxHeight < 600;
-        return Consumer<TodoProvider>(
-          builder: (context, notifier, child) {
-              return ListView.builder(
-                  itemCount: notifier.todos.length,
-                  itemBuilder: (context, index) {
-                    return Card(
-                      elevation: 0.0,
-                      child: ListTile(
-                        title: Text(notifier.todos[index]),
-                        trailing: IconButton(
-                          icon: Icon(Icons.clear),
-                          onPressed: () => notifier.remove(index),
-                        ),
-                      ),
-                    );
-                  }
-              );
-          },
-        );
-      }
-    );
+    final todos = context.select((List<String> state) => state);
+    return ListView.builder(
+        itemCount: todos.length,
+        itemBuilder: (context, index) {
+          return Card(
+            elevation: 0.0,
+            child: ListTile(
+              title: Text(todos[index]),
+              trailing: IconButton(
+                icon: Icon(Icons.clear),
+                onPressed: () => context.read<TodoController>().remove(index),
+              ),
+            ),
+          );
+        });
   }
 }
