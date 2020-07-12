@@ -1,6 +1,5 @@
-
-
 import 'package:flutter/material.dart';
+import 'package:prc_infinite_screen/sample_flutter_gallery/transformations_demo_board.dart';
 import 'package:vector_math/vector_math_64.dart' show Vector3;
 
 enum _GestureType {
@@ -9,7 +8,6 @@ enum _GestureType {
   rotate,
 }
 
-
 class InfiniteScreen2 extends StatefulWidget {
   InfiniteScreen2({Key key}) : super(key: key);
   @override
@@ -17,44 +15,49 @@ class InfiniteScreen2 extends StatefulWidget {
 }
 
 class _InfiniteScreenState extends State<InfiniteScreen2> {
+  // The radius of a hexagon tile in pixels.
+  static const _kHexagonRadius = 32.0;
+  // The margin between hexagons.
+  static const _kHexagonMargin = 1.0;
+  // The radius of the entire board in hexagons, not including the center.
+  static const _kBoardRadius = 12;
+
+  bool _reset = false;
+  Board _board = Board(
+    boardRadius: _kBoardRadius,
+    hexagonRadius: _kHexagonRadius,
+    hexagonMargin: _kHexagonMargin,
+  );
+
   @override
   Widget build(BuildContext context) {
+    final painter = BoardPainter(
+      board: _board,
+    );
+
+
     return Scaffold(
       appBar: AppBar(
         title: Text("Infinite Screen"),
       ),
-      body: Center(
-        child: SafeArea(
-          child: LayoutBuilder(builder: (context, constraints) {
-            final size = Size(constraints.maxWidth, constraints.maxHeight);
-            final visibleSize = Size(size.width * 4, size.height * 4);
-            return Stack(
-              children: <Widget>[
-                InfiniteScreenTransformtable(
-                    child: Container(
-                      color: Colors.green,
-                      child: Center(
-                        child: Container(
-                          color: Colors.red,
-                          width: 100,
-                          height: 100,
-                        ),
-                      ),
-                    ),
-                    size: size,
-                    boundaryRect: Rect.fromLTWH(
-                        -visibleSize.width / 2,
-                        -visibleSize.height / 2,
-                        visibleSize.width,
-                        visibleSize.height
-                    ),
-                  initialTranslation: Offset.zero,
-                ),
-              ],
-            );
-          }),
-        ),
-      ),
+      body: LayoutBuilder(builder: (context, constraints) {
+        final size = Size(constraints.maxWidth, constraints.maxHeight);
+        print(size);
+        final visibleSize = Size(size.width * 3, size.height * 3);
+        print(visibleSize);
+        return InfiniteScreenTransformtable(
+          child: CustomPaint(
+            painter: painter,
+          ),
+          size: size,
+          boundaryRect: Rect.fromLTWH(
+              -visibleSize.width / 2,
+              -visibleSize.height / 2,
+              visibleSize.width,
+              visibleSize.height),
+          initialTranslation: Offset.zero,
+        );
+      }),
     );
   }
 }
@@ -66,7 +69,7 @@ class InfiniteScreenTransformtable extends StatefulWidget {
     @required this.size,
     this.boundaryRect,
     this.initialTranslation,
-}):super(key: key);
+  }) : super(key: key);
 
   final Widget child;
   final Size size;
@@ -74,11 +77,12 @@ class InfiniteScreenTransformtable extends StatefulWidget {
   final Offset initialTranslation;
 
   @override
-  _InfiniteScreenTransformtableState createState() => _InfiniteScreenTransformtableState();
+  _InfiniteScreenTransformtableState createState() =>
+      _InfiniteScreenTransformtableState();
 }
 
-class _InfiniteScreenTransformtableState extends State<InfiniteScreenTransformtable> {
-
+class _InfiniteScreenTransformtableState
+    extends State<InfiniteScreenTransformtable> {
   Matrix4 _transform = Matrix4.identity();
   _GestureType gestureType;
   Rect _boundaryRect;
@@ -92,16 +96,13 @@ class _InfiniteScreenTransformtableState extends State<InfiniteScreenTransformta
 
   static fromViewport(Offset viewPoint, Matrix4 transform) {
     final inverseMatrix = Matrix4.inverted(transform);
-    final untransformed = inverseMatrix.transform3(Vector3(
-        viewPoint.dx,
-        viewPoint.dy,
-        0
-    ));
+    final untransformed =
+        inverseMatrix.transform3(Vector3(viewPoint.dx, viewPoint.dy, 0));
     return Offset(untransformed.x, untransformed.y);
   }
 
   Matrix4 matrixTranslate(Matrix4 matrix, Offset translation) {
-    print("matrixtranslate:${translation.toString()}");
+
     if (translation == Offset.zero) {
       return matrix;
     }
@@ -147,7 +148,6 @@ class _InfiniteScreenTransformtableState extends State<InfiniteScreenTransformta
   }
 
   void _onScaleUpdate(ScaleUpdateDetails details) {
-    print('onScaleUpdate: ${details.focalPoint}');
     final focalPointScene = fromViewport(
       details.focalPoint,
       _transform,
@@ -207,5 +207,33 @@ class _InfiniteScreenTransformtableState extends State<InfiniteScreenTransformta
         ),
       ),
     );
+  }
+}
+
+
+class BoardPainter extends CustomPainter {
+  const BoardPainter({
+    this.board,
+  });
+
+  final Board board;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    void drawBoardPoint(BoardPoint boardPoint) {
+      final color = boardPoint.color.withOpacity(
+        board.selected == boardPoint ? 0.7 : 1,
+      );
+      final vertices = board.getVerticesForBoardPoint(boardPoint, color);
+      canvas.drawVertices(vertices, BlendMode.color, Paint());
+    }
+
+    board.forEach(drawBoardPoint);
+  }
+
+  // We should repaint whenever the board changes, such as board.selected.
+  @override
+  bool shouldRepaint(BoardPainter oldDelegate) {
+    return oldDelegate.board != board;
   }
 }
