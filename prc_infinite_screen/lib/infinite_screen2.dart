@@ -46,8 +46,23 @@ class _InfiniteScreenState extends State<InfiniteScreen2> {
         final visibleSize = Size(size.width * 3, size.height * 3);
         print(visibleSize);
         return InfiniteScreenTransformtable(
-          child: CustomPaint(
-            painter: painter,
+          child: OverflowBox(
+            minWidth: 0,
+            minHeight: 0,
+            maxWidth: visibleSize.width,
+            maxHeight: visibleSize.height,
+            child: Container(
+              color: Colors.green,
+              width: visibleSize.width,
+              height: visibleSize.height,
+              child: Center(
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  color: Colors.red,
+                ),
+              ),
+            ),
           ),
           size: size,
           boundaryRect: Rect.fromLTWH(
@@ -55,6 +70,7 @@ class _InfiniteScreenState extends State<InfiniteScreen2> {
               -visibleSize.height / 2,
               visibleSize.width,
               visibleSize.height),
+//          initialTranslation: Offset(size.width / 2, size.height / 2),
           initialTranslation: Offset.zero,
         );
       }),
