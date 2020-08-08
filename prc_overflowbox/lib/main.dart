@@ -24,22 +24,25 @@ class MyHomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(
       child: Center(
-        child: Container(
-          width: 200,
-          height: 200,
-          color: Colors.green,
-          child: Align(
-            alignment: const Alignment(1, 1),
-            child: SizedBox(
-              width: 10,
-              height: 20,
-              child: OverflowBox(
-                minWidth: 0,
-                minHeight: 0,
-                maxWidth: 100,
-                maxHeight: 50,
-                child: Container(
-                  color: Colors.blue,
+        child: GestureDetector(
+          onTap: () {
+            print('TAP!!!!!');
+          },
+          child: Container(
+            width: 200,
+            height: 200,
+            color: Colors.green,
+            child: Align(
+              alignment: const Alignment(1, 1),
+              child: SizedBox(
+                width: 10,
+                height: 20,
+                child: OverflowBox(
+                  maxWidth: 300,
+                  maxHeight: 300,
+                  child: Container(
+                    color: Colors.blue,
+                  ),
                 ),
               ),
             ),
