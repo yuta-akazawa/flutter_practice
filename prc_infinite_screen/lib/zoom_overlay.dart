@@ -33,11 +33,9 @@ class _TransformWidgetState extends State<TransformWidget> {
 
 class ZoomOverlay extends StatefulWidget {
   final Widget child;
-  final bool twoTouchOnly;
   const ZoomOverlay({
     Key key,
     @required this.child,
-    @required this.twoTouchOnly,
   }) : super(key: key);
 
   @override
@@ -48,27 +46,14 @@ class _ZoomOverlayState extends State<ZoomOverlay>
     with TickerProviderStateMixin {
   Matrix4 _matrix = Matrix4.identity();
   Offset _startFocalPoint;
-//  Animation<Matrix4> _animationReset;
-//  AnimationController _controllerReset;
   OverlayEntry _overlayEntry;
   bool _isZooming = false;
-  int _touchCount = 0;
   Matrix4 _transformMatrix = Matrix4.identity();
   double _x = 100;
   double _y = 100;
 
   final GlobalKey<_TransformWidgetState> _transformWidget =
       GlobalKey<_TransformWidgetState>();
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,28 +63,23 @@ class _ZoomOverlayState extends State<ZoomOverlay>
         width: 50,
         height: 50,
       ),
-      child: Listener(
-        onPointerDown: _incrementEnter,
-        onPointerUp: _incrementExit,
-        child: GestureDetector(
-          onTap: () {
-            print('on tap!!!!!');
-          },
-          onScaleStart: (details) {
-            onScaleStart(details, context);
-          },
-          onScaleUpdate: onScaleUpdate,
-          child: Opacity(
-            opacity: _isZooming ? 0 : 1,
-            child: widget.child,
-          ),
+      child: GestureDetector(
+        onTap: () {
+          print('on tap!!!!!');
+        },
+        onScaleStart: (details) {
+          onScaleStart(details, context);
+        },
+        onScaleUpdate: onScaleUpdate,
+        child: Opacity(
+          opacity: _isZooming ? 0 : 1,
+          child: widget.child,
         ),
       ),
     );
   }
 
   void onScaleStart(ScaleStartDetails details, BuildContext context) {
-    if (widget.twoTouchOnly && _touchCount < 2) return;
     _startFocalPoint = details.focalPoint;
     _matrix = Matrix4.identity();
 
@@ -161,21 +141,5 @@ class _ZoomOverlayState extends State<ZoomOverlay>
       _overlayEntry = OverlayEntry(builder: _build);
       overlayState.insert(_overlayEntry);
     }
-  }
-
-  void hide() async {
-    setState(() {
-      _isZooming = false;
-    });
-    _overlayEntry.remove();
-    _overlayEntry = null;
-  }
-
-  void _incrementEnter(PointerEvent details) {
-    _touchCount++;
-  }
-
-  void _incrementExit(PointerEvent details) {
-    _touchCount--;
   }
 }
