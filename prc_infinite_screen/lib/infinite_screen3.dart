@@ -18,7 +18,7 @@ class _InfiniteScreenState extends State<InfiniteScreen3> {
       body: Container(
         child: LayoutBuilder(builder: (context, constraints) {
           final size = Size(constraints.maxWidth, constraints.maxHeight);
-          final visibleSize = Size(size.width * 3, size.height * 3);
+          final visibleSize = Size(size.width * 1.5, size.height * 1.5);
 
           return GestureTransformable(
             child: OverflowBox(
@@ -38,17 +38,18 @@ class _InfiniteScreenState extends State<InfiniteScreen3> {
                           height: 100,
                         ),
                         child: GestureDetector(
-                          onTap: () {
-                            print('TAP !!!!!');
-                          },
-                          onScaleUpdate: (details) {
-                            setState(() {
-                              _x = details.focalPoint.dx;
-                              _y = details.focalPoint.dy;
-                            });
-                          },
-                          child: Container(color: Colors.grey),
-                        ),
+                            onTap: () {
+                              print('TAP !!!!!');
+                            },
+                            onScaleUpdate: (details) {
+                              setState(() {
+                                print(
+                                    'child.onScaleUpdate: ${details.focalPoint}');
+                                _x = details.focalPoint.dx;
+                                _y = details.focalPoint.dy;
+                              });
+                            },
+                            child: Container(color: Colors.grey)),
                       ),
                     ),
                     Center(

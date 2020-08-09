@@ -1,26 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:vector_math/vector_math_64.dart' as math;
 
-class EntireViewScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: SafeArea(
-        child: ZoomOverlay(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                width: 50,
-                height: 50,
-                color: Colors.green,
-              ),
-            ),
-            twoTouchOnly: false),
-      ),
-    );
-  }
-}
-
 class TransformWidget extends StatefulWidget {
   final Widget child;
   final Matrix4 matrix;
@@ -68,12 +48,14 @@ class _ZoomOverlayState extends State<ZoomOverlay>
     with TickerProviderStateMixin {
   Matrix4 _matrix = Matrix4.identity();
   Offset _startFocalPoint;
-  Animation<Matrix4> _animationReset;
-  AnimationController _controllerReset;
+//  Animation<Matrix4> _animationReset;
+//  AnimationController _controllerReset;
   OverlayEntry _overlayEntry;
   bool _isZooming = false;
   int _touchCount = 0;
   Matrix4 _transformMatrix = Matrix4.identity();
+  double _x = 100;
+  double _y = 100;
 
   final GlobalKey<_TransformWidgetState> _transformWidget =
       GlobalKey<_TransformWidgetState>();
@@ -81,38 +63,36 @@ class _ZoomOverlayState extends State<ZoomOverlay>
   @override
   void initState() {
     super.initState();
-    _controllerReset =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
-    _controllerReset.addListener(() {
-      _transformWidget.currentState.setMatrix(_animationReset.value);
-    });
-    _controllerReset.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        hide();
-      }
-    });
   }
 
   @override
   void dispose() {
-    _controllerReset.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: _incrementEnter,
-      onPointerUp: _incrementExit,
-      child: GestureDetector(
-        onScaleStart: (details) {
-          onScaleStart(details, context);
-        },
-        onScaleUpdate: onScaleUpdate,
-        onScaleEnd: onScaleEnd,
-        child: Opacity(
-          opacity: _isZooming ? 0 : 1,
-          child: widget.child,
+    return Positioned.fromRect(
+      rect: Rect.fromCenter(
+        center: Offset(_x, _y),
+        width: 50,
+        height: 50,
+      ),
+      child: Listener(
+        onPointerDown: _incrementEnter,
+        onPointerUp: _incrementExit,
+        child: GestureDetector(
+          onTap: () {
+            print('on tap!!!!!');
+          },
+          onScaleStart: (details) {
+            onScaleStart(details, context);
+          },
+          onScaleUpdate: onScaleUpdate,
+          child: Opacity(
+            opacity: _isZooming ? 0 : 1,
+            child: widget.child,
+          ),
         ),
       ),
     );
@@ -151,19 +131,15 @@ class _ZoomOverlayState extends State<ZoomOverlay>
     Matrix4 scale = Matrix4(details.scale, 0, 0, 0, 0, details.scale, 0, 0, 0,
         0, 1, 0, dx, dy, 0, 1);
     _matrix = translate * scale;
+    print(details.localFocalPoint);
+    setState(() {
+      _x = details.localFocalPoint.dx;
+      _y = details.localFocalPoint.dy;
+    });
 
     if (_transformWidget != null && _transformWidget.currentState != null) {
       _transformWidget.currentState.setMatrix(_matrix);
     }
-  }
-
-  void onScaleEnd(ScaleEndDetails details) {
-    if (!_isZooming) return;
-
-    _animationReset = Matrix4Tween(begin: _matrix, end: Matrix4.identity())
-        .animate(_controllerReset);
-    _controllerReset.reset();
-    _controllerReset.forward();
   }
 
   Widget _build(BuildContext context) {
