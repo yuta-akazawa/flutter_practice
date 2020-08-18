@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:prc_infinite_screen/sample_flutter_gallery/transformations_demo_gesture_transformable.dart';
 import 'package:prc_infinite_screen/zoom_overlay.dart';
 
 class InfiniteScreen4 extends StatefulWidget {
@@ -77,66 +76,15 @@ class _InfiniteScreenState extends State<InfiniteScreen4> {
                     height: 50,
                   ),
                   child: GestureDetector(
-                      onScaleUpdate: (details) {
+                      onPanUpdate: (details) {
                         setState(() {
-                          _dx = details.focalPoint.dx;
-                          _dy = details.focalPoint.dy;
+                          _dx = _dx + details.delta.dx;
+                          _dy = _dy + details.delta.dy;
                         });
                       },
                       child: Container(
                         color: Colors.blue,
                       )),
-                ),
-              ],
-            ),
-          )),
-    );
-  }
-
-  Widget _buildGestureTransformableAndOverlay(Size viewportSize) {
-    final visibleSize = Size(viewportSize.width * 3, viewportSize.height * 3);
-    return ClipRect(
-      child: GestureTransformable(
-          boundaryRect: Rect.fromLTWH(-visibleSize.width / 3,
-              -visibleSize.height / 4, visibleSize.width, visibleSize.height),
-          initialTranslation: Offset.zero,
-          size: viewportSize,
-          child: Container(
-            color: Colors.green,
-            child: Stack(
-              children: [
-                ZoomOverlay(
-                    child: Container(
-                  width: 50,
-                  height: 50,
-                  color: Colors.blue,
-                )),
-              ],
-            ),
-          )),
-    );
-  }
-
-  Widget _buildGestureTransformable(Size viewportSize) {
-    final visibleSize = Size(viewportSize.width * 3, viewportSize.height * 3);
-    return ClipRect(
-      child: GestureTransformable(
-          boundaryRect: Rect.fromLTWH(-visibleSize.width / 3,
-              -visibleSize.height / 4, visibleSize.width, visibleSize.height),
-          initialTranslation: Offset.zero,
-          size: viewportSize,
-          child: Container(
-            color: Colors.green,
-            child: Stack(
-              children: [
-                InteractiveViewer(
-                  boundaryMargin:
-                      EdgeInsets.symmetric(vertical: 100, horizontal: 100),
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    color: Colors.blue,
-                  ),
                 ),
               ],
             ),
@@ -166,17 +114,10 @@ class _InfiniteScreenState extends State<InfiniteScreen4> {
             }
             return _buildInteractiveViewerTwice(viewportSize);
 //            return _buildInteractiveViewerAndOverlay(viewportSize);
-//            return _buildGestureTransformableAndOverlay(viewportSize);
-//            return _buildGestureTransformable(viewportSize);
 //            return _buildInteractiveViewerAndGestureDetector(viewportSize);
           },
         ),
       ),
     );
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 }

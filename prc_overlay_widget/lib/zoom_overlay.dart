@@ -6,16 +6,30 @@ class EntireViewScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
-        child: ZoomOverlay(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Container(
-                width: 50,
-                height: 50,
-                color: Colors.green,
+        child: Stack(
+          children: [
+            ZoomOverlay(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  color: Colors.green,
+                ),
               ),
             ),
-            twoTouchOnly: false),
+            ZoomOverlay(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Container(
+                  width: 50,
+                  height: 50,
+                  color: Colors.green,
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -53,11 +67,9 @@ class _TransformWidgetState extends State<TransformWidget> {
 
 class ZoomOverlay extends StatefulWidget {
   final Widget child;
-  final bool twoTouchOnly;
   const ZoomOverlay({
     Key key,
     @required this.child,
-    @required this.twoTouchOnly,
   }) : super(key: key);
 
   @override
@@ -68,12 +80,12 @@ class _ZoomOverlayState extends State<ZoomOverlay>
     with TickerProviderStateMixin {
   Matrix4 _matrix = Matrix4.identity();
   Offset _startFocalPoint;
-  Animation<Matrix4> _animationReset;
   AnimationController _controllerReset;
   OverlayEntry _overlayEntry;
   bool _isZooming = false;
-  int _touchCount = 0;
   Matrix4 _transformMatrix = Matrix4.identity();
+  double _dx = 100;
+  double _dy = 100;
 
   final GlobalKey<_TransformWidgetState> _transformWidget =
       GlobalKey<_TransformWidgetState>();
@@ -82,10 +94,7 @@ class _ZoomOverlayState extends State<ZoomOverlay>
   void initState() {
     super.initState();
     _controllerReset =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
-    _controllerReset.addListener(() {
-      _transformWidget.currentState.setMatrix(_animationReset.value);
-    });
+        AnimationController(vsync: this, duration: Duration(milliseconds: 10));
     _controllerReset.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         hide();
@@ -96,14 +105,16 @@ class _ZoomOverlayState extends State<ZoomOverlay>
   @override
   void dispose() {
     _controllerReset.dispose();
+    _overlayEntry.remove();
+    _overlayEntry = null;
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Listener(
-      onPointerDown: _incrementEnter,
-      onPointerUp: _incrementExit,
+    return Positioned.fromRect(
+      rect: Rect.fromCenter(center: Offset(_dx, _dy), width: 50, height: 50),
       child: GestureDetector(
         onScaleStart: (details) {
           onScaleStart(details, context);
@@ -119,7 +130,6 @@ class _ZoomOverlayState extends State<ZoomOverlay>
   }
 
   void onScaleStart(ScaleStartDetails details, BuildContext context) {
-    if (widget.twoTouchOnly && _touchCount < 2) return;
     _startFocalPoint = details.focalPoint;
     _matrix = Matrix4.identity();
 
@@ -152,6 +162,11 @@ class _ZoomOverlayState extends State<ZoomOverlay>
         0, 1, 0, dx, dy, 0, 1);
     _matrix = translate * scale;
 
+    setState(() {
+      _dx = details.focalPoint.dx;
+      _dy = details.focalPoint.dy;
+    });
+
     if (_transformWidget != null && _transformWidget.currentState != null) {
       _transformWidget.currentState.setMatrix(_matrix);
     }
@@ -159,9 +174,6 @@ class _ZoomOverlayState extends State<ZoomOverlay>
 
   void onScaleEnd(ScaleEndDetails details) {
     if (!_isZooming) return;
-
-    _animationReset = Matrix4Tween(begin: _matrix, end: Matrix4.identity())
-        .animate(_controllerReset);
     _controllerReset.reset();
     _controllerReset.forward();
   }
@@ -193,13 +205,5 @@ class _ZoomOverlayState extends State<ZoomOverlay>
     });
     _overlayEntry.remove();
     _overlayEntry = null;
-  }
-
-  void _incrementEnter(PointerEvent details) {
-    _touchCount++;
-  }
-
-  void _incrementExit(PointerEvent details) {
-    _touchCount--;
   }
 }

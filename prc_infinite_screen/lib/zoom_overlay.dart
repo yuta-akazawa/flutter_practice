@@ -46,31 +46,47 @@ class _ZoomOverlayState extends State<ZoomOverlay>
     with TickerProviderStateMixin {
   Matrix4 _matrix = Matrix4.identity();
   Offset _startFocalPoint;
+  AnimationController _controllerReset;
   OverlayEntry _overlayEntry;
   bool _isZooming = false;
   Matrix4 _transformMatrix = Matrix4.identity();
-  double _x = 100;
-  double _y = 100;
+  double _dx = 100;
+  double _dy = 100;
 
   final GlobalKey<_TransformWidgetState> _transformWidget =
       GlobalKey<_TransformWidgetState>();
 
   @override
+  void initState() {
+    super.initState();
+    _controllerReset =
+        AnimationController(vsync: this, duration: Duration(milliseconds: 10));
+    _controllerReset.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        hide();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controllerReset.dispose();
+    _overlayEntry.remove();
+    _overlayEntry = null;
+
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Positioned.fromRect(
-      rect: Rect.fromCenter(
-        center: Offset(_x, _y),
-        width: 50,
-        height: 50,
-      ),
+      rect: Rect.fromCenter(center: Offset(_dx, _dy), width: 50, height: 50),
       child: GestureDetector(
-        onTap: () {
-          print('on tap!!!!!');
-        },
         onScaleStart: (details) {
           onScaleStart(details, context);
         },
         onScaleUpdate: onScaleUpdate,
+        onScaleEnd: onScaleEnd,
         child: Opacity(
           opacity: _isZooming ? 0 : 1,
           child: widget.child,
@@ -111,15 +127,21 @@ class _ZoomOverlayState extends State<ZoomOverlay>
     Matrix4 scale = Matrix4(details.scale, 0, 0, 0, 0, details.scale, 0, 0, 0,
         0, 1, 0, dx, dy, 0, 1);
     _matrix = translate * scale;
-    print(details.localFocalPoint);
+
     setState(() {
-      _x = details.localFocalPoint.dx;
-      _y = details.localFocalPoint.dy;
+      _dx = details.focalPoint.dx;
+      _dy = details.focalPoint.dy;
     });
 
     if (_transformWidget != null && _transformWidget.currentState != null) {
       _transformWidget.currentState.setMatrix(_matrix);
     }
+  }
+
+  void onScaleEnd(ScaleEndDetails details) {
+    if (!_isZooming) return;
+    _controllerReset.reset();
+    _controllerReset.forward();
   }
 
   Widget _build(BuildContext context) {
@@ -141,5 +163,13 @@ class _ZoomOverlayState extends State<ZoomOverlay>
       _overlayEntry = OverlayEntry(builder: _build);
       overlayState.insert(_overlayEntry);
     }
+  }
+
+  void hide() async {
+    setState(() {
+      _isZooming = false;
+    });
+    _overlayEntry.remove();
+    _overlayEntry = null;
   }
 }
