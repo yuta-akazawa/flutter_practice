@@ -12,83 +12,45 @@ class _InfiniteScreenState extends State<InfiniteScreen4> {
   Matrix4 _matrix;
   double _dx = 100;
   double _dy = 100;
-
-  Widget _buildInteractiveViewerTwice(Size viewportSize) {
-    return ClipRect(
-      child: InteractiveViewer(
-          transformationController: _controller,
-          boundaryMargin: EdgeInsets.symmetric(
-              horizontal: viewportSize.width, vertical: viewportSize.height),
-          child: Container(
-            color: Colors.green,
-            child: Stack(
-              children: [
-                InteractiveViewer(
-                    boundaryMargin:
-                        EdgeInsets.symmetric(vertical: 1000, horizontal: 1000),
-                    child: Container(
-                      width: 50,
-                      height: 50,
-                      color: Colors.blue,
-                    )),
-              ],
-            ),
-          )),
-    );
-  }
-
-  Widget _buildInteractiveViewerAndOverlay(Size viewportSize) {
-    return ClipRect(
-      child: InteractiveViewer(
-          transformationController: _controller,
-          boundaryMargin: EdgeInsets.symmetric(
-              horizontal: viewportSize.width, vertical: viewportSize.height),
-          child: Container(
-            color: Colors.green,
-            child: Stack(
-              children: [
-                ZoomOverlay(
-                    child: Container(
-                  width: 50,
-                  height: 50,
-                  color: Colors.blue,
-                )),
-              ],
-            ),
-          )),
-    );
-  }
+  int index = 0;
 
   Widget _buildInteractiveViewerAndGestureDetector(Size viewportSize) {
     return ClipRect(
-      child: InteractiveViewer(
+      child: GestureDetector(
+        child: InteractiveViewer(
           transformationController: _controller,
           boundaryMargin: EdgeInsets.symmetric(
               horizontal: viewportSize.width, vertical: viewportSize.height),
-          child: Container(
-            color: Colors.green,
-            child: Stack(
-              children: [
-                Positioned.fromRect(
-                  rect: Rect.fromCenter(
-                    center: Offset(_dx, _dy),
+          child: Stack(
+            children: [
+              Container(
+                color: Colors.green,
+              ),
+              Transform(
+                transform: Matrix4.translationValues(_dx, _dy, 0),
+                child: GestureDetector(
+                  behavior: HitTestBehavior.translucent,
+                  onPanUpdate: (details) {
+                    setState(() {
+                      _dx = _dx + details.delta.dx;
+                      _dy = _dy + details.delta.dy;
+                    });
+                    print("blue item: ${details.delta}");
+                  },
+                  onTap: () {
+                    print("blue item TAP: ${index.toString()}");
+                  },
+                  child: Container(
                     width: 50,
                     height: 50,
+                    color: Colors.blue,
                   ),
-                  child: GestureDetector(
-                      onPanUpdate: (details) {
-                        setState(() {
-                          _dx = _dx + details.delta.dx;
-                          _dy = _dy + details.delta.dy;
-                        });
-                      },
-                      child: Container(
-                        color: Colors.blue,
-                      )),
                 ),
-              ],
-            ),
-          )),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 
@@ -112,9 +74,7 @@ class _InfiniteScreenState extends State<InfiniteScreen4> {
                 );
               _controller.value = _matrix;
             }
-            return _buildInteractiveViewerTwice(viewportSize);
-//            return _buildInteractiveViewerAndOverlay(viewportSize);
-//            return _buildInteractiveViewerAndGestureDetector(viewportSize);
+            return _buildInteractiveViewerAndGestureDetector(viewportSize);
           },
         ),
       ),

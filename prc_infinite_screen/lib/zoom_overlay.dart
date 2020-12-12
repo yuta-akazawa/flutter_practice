@@ -60,7 +60,7 @@ class _ZoomOverlayState extends State<ZoomOverlay>
   void initState() {
     super.initState();
     _controllerReset =
-        AnimationController(vsync: this, duration: Duration(milliseconds: 10));
+        AnimationController(value: 1, duration: Duration(milliseconds: 100));
     _controllerReset.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         hide();
@@ -79,8 +79,9 @@ class _ZoomOverlayState extends State<ZoomOverlay>
 
   @override
   Widget build(BuildContext context) {
-    return Positioned.fromRect(
-      rect: Rect.fromCenter(center: Offset(_dx, _dy), width: 50, height: 50),
+    print('position: ${Offset(_dx, _dy)}');
+    return Transform(
+      transform: Matrix4.translationValues(_dx, _dy, 0),
       child: GestureDetector(
         onScaleStart: (details) {
           onScaleStart(details, context);

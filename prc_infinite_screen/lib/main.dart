@@ -16,8 +16,6 @@ class MyApp extends StatelessWidget {
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: InfiniteScreen4(),
-//      home: InfiniteScreen3(),
-      // home: TransformationsDemo(),
     );
   }
 }
