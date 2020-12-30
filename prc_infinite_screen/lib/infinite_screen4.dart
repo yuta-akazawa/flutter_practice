@@ -16,37 +16,52 @@ class _InfiniteScreenState extends State<InfiniteScreen4> {
 
   Widget _buildInteractiveViewerAndGestureDetector(Size viewportSize) {
     return ClipRect(
-      child: GestureDetector(
-        child: InteractiveViewer(
-          transformationController: _controller,
-          boundaryMargin: EdgeInsets.symmetric(
-              horizontal: viewportSize.width, vertical: viewportSize.height),
+      child: InteractiveViewer(
+        transformationController: _controller,
+        boundaryMargin: EdgeInsets.symmetric(
+          horizontal: viewportSize.width / 2,
+          vertical: viewportSize.height / 2,
+        ),
+        child: Container(
+          color: Colors.yellow,
+          height: 1000,
+          width: 1000,
           child: Stack(
+            overflow: Overflow.visible,
             children: [
-              Container(
-                color: Colors.green,
-              ),
-              Transform(
-                transform: Matrix4.translationValues(_dx, _dy, 0),
-                child: GestureDetector(
-                  behavior: HitTestBehavior.translucent,
-                  onPanUpdate: (details) {
-                    setState(() {
-                      _dx = _dx + details.delta.dx;
-                      _dy = _dy + details.delta.dy;
-                    });
-                    print("blue item: ${details.delta}");
-                  },
-                  onTap: () {
-                    print("blue item TAP: ${index.toString()}");
-                  },
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    color: Colors.blue,
-                  ),
-                ),
-              ),
+              Positioned(
+                  top: 0,
+                  left: 0,
+                  height: MediaQuery.of(context).size.height,
+                  width: MediaQuery.of(context).size.width,
+                  child: Stack(
+                    children: [
+                      Container(
+                        color: Colors.green,
+                      ),
+                      Transform(
+                        transform: Matrix4.translationValues(_dx, _dy, 0),
+                        child: GestureDetector(
+                          behavior: HitTestBehavior.translucent,
+                          onPanUpdate: (details) {
+                            setState(() {
+                              _dx = _dx + details.delta.dx;
+                              _dy = _dy + details.delta.dy;
+                            });
+                            print("blue item: ${details.delta}");
+                          },
+                          onTap: () {
+                            print("blue item TAP");
+                          },
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            color: Colors.blue,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )),
             ],
           ),
         ),
@@ -57,23 +72,22 @@ class _InfiniteScreenState extends State<InfiniteScreen4> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Infinite Screen4')),
       body: Container(
         color: Colors.grey,
-        width: MediaQuery.of(context).size.width,
-        height: MediaQuery.of(context).size.height,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final viewportSize =
                 Size(constraints.maxWidth, constraints.maxHeight);
+            print(viewportSize);
             if (_matrix != null) {
               _matrix = Matrix4.identity()
                 ..translate(
-                  viewportSize.width / 2,
-                  viewportSize.height / 2,
+                  viewportSize.width,
+                  viewportSize.height,
                 );
               _controller.value = _matrix;
             }
+            // return _buildInteractiveViewerAndGestureDetector(viewportSize);
             return _buildInteractiveViewerAndGestureDetector(viewportSize);
           },
         ),

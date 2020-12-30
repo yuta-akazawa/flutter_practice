@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:prc_infinite_screen/infinite_screen4.dart';
+import 'package:prc_infinite_screen/infinite_screen5.dart';
 
 void main() {
   runApp(MyApp());
@@ -15,7 +16,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: InfiniteScreen4(),
+      home: InfiniteScreen5(),
     );
   }
 }

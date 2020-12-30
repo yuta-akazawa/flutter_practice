@@ -60,7 +60,7 @@ class _ZoomOverlayState extends State<ZoomOverlay>
   void initState() {
     super.initState();
     _controllerReset =
-        AnimationController(value: 1, duration: Duration(milliseconds: 100));
+        AnimationController(vsync: this, duration: Duration(milliseconds: 100));
     _controllerReset.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         hide();
